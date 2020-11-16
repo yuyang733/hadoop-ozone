@@ -76,6 +76,8 @@ public interface DatanodeStore {
    */
   Table<String, ChunkInfoList> getDeletedBlocksTable();
 
+  Table<String, ChunkInfoList> getTruncatedBlocksTable();
+
   /**
    * Helper to create and write batch transactions.
    */

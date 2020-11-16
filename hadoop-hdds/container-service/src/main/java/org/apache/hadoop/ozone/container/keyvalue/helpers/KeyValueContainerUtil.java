@@ -221,6 +221,10 @@ public final class KeyValueContainerUtil {
             .updateDeleteTransactionId(delTxnId);
       }
 
+      // Set delete truncate id.
+      Long truncateTxId =
+          metadataTable.get(OzoneConsts.TRANSACTION_INFO_KEY);
+
       // Set BlockCommitSequenceId.
       Long bcsId = metadataTable.get(
           OzoneConsts.BLOCK_COMMIT_SEQUENCE_ID);

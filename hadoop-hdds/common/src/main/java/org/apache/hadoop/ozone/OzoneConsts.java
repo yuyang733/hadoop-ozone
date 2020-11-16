@@ -140,14 +140,18 @@ public final class OzoneConsts {
 
   // Block ID prefixes used in datanode containers.
   public static final String DELETING_KEY_PREFIX = "#deleting#";
+  public static final String TRUNCATING_KEY_PREFIX = "#truncating#";
 
   // Metadata keys for datanode containers.
   public static final String DELETE_TRANSACTION_KEY = "#delTX";
+  public static final String TRUNCATE_TRANSACTION_KEY = "#truncateTX";
   public static final String BLOCK_COMMIT_SEQUENCE_ID = "#BCSID";
   public static final String BLOCK_COUNT = "#BLOCKCOUNT";
   public static final String CONTAINER_BYTES_USED = "#BYTESUSED";
   public static final String PENDING_DELETE_BLOCK_COUNT =
       "#PENDINGDELETEBLOCKCOUNT";
+  public static final String PENDING_TRUNCATE_BLOCK_COUNT =
+      "#PENDINGTRUNCATEBLOCKCOUNT";
 
   /**
    * OM LevelDB prefixes.

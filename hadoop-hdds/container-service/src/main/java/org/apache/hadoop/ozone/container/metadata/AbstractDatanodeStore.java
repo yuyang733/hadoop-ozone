@@ -26,6 +26,7 @@ import org.apache.hadoop.hdds.utils.MetadataKeyFilters;
 import org.apache.hadoop.hdds.utils.MetadataKeyFilters.KeyPrefixFilter;
 import org.apache.hadoop.hdds.utils.db.*;
 import org.apache.hadoop.ozone.container.common.helpers.BlockData;
+import org.apache.hadoop.ozone.container.common.helpers.ChunkInfo;
 import org.apache.hadoop.ozone.container.common.helpers.ChunkInfoList;
 import org.apache.hadoop.ozone.container.common.interfaces.BlockIterator;
 import org.rocksdb.BlockBasedTableConfig;
@@ -66,6 +67,8 @@ public abstract class AbstractDatanodeStore implements DatanodeStore {
   private Table<String, BlockData> blockDataTableWithIterator;
 
   private Table<String, ChunkInfoList> deletedBlocksTable;
+
+  private Table<String, ChunkInfoList> truncatedBlocksTable;
 
   private static final Logger LOG =
       LoggerFactory.getLogger(AbstractDatanodeStore.class);
@@ -143,6 +146,10 @@ public abstract class AbstractDatanodeStore implements DatanodeStore {
       deletedBlocksTable = new DatanodeTable<>(
               dbDef.getDeletedBlocksColumnFamily().getTable(this.store));
       checkTableStatus(deletedBlocksTable, deletedBlocksTable.getName());
+
+      truncatedBlocksTable = new DatanodeTable<>(
+          dbDef.getTruncatedBlocksColumnFamily().getTable(this.store));
+      checkTableStatus(truncatedBlocksTable, truncatedBlocksTable.getName());
     }
   }
 
@@ -177,6 +184,11 @@ public abstract class AbstractDatanodeStore implements DatanodeStore {
   @Override
   public Table<String, ChunkInfoList> getDeletedBlocksTable() {
     return deletedBlocksTable;
+  }
+
+  @Override
+  public Table<String, ChunkInfoList> getTruncatedBlocksTable() {
+    return truncatedBlocksTable;
   }
 
   @Override

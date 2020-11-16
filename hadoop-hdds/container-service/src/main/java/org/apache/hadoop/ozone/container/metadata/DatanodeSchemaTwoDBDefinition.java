@@ -57,6 +57,14 @@ public class DatanodeSchemaTwoDBDefinition extends
                   new StringCodec(),
                   ChunkInfoList.class,
                   new ChunkInfoListCodec());
+  public static final DBColumnFamilyDefinition<String, ChunkInfoList>
+          TRUNCATED_BLOCKS =
+      new DBColumnFamilyDefinition<>(
+          "truncated_blocks",
+          String.class,
+          new StringCodec(),
+          ChunkInfoList.class,
+          new ChunkInfoListCodec());
 
   protected DatanodeSchemaTwoDBDefinition(String dbPath) {
     super(dbPath);
@@ -77,5 +85,11 @@ public class DatanodeSchemaTwoDBDefinition extends
   public DBColumnFamilyDefinition<String, ChunkInfoList>
       getDeletedBlocksColumnFamily() {
     return DELETED_BLOCKS;
+  }
+
+  @Override
+  public DBColumnFamilyDefinition<String, ChunkInfoList>
+  getTruncatedBlocksColumnFamily() {
+    return TRUNCATED_BLOCKS;
   }
 }

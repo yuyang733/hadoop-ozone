@@ -28,27 +28,43 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.hadoop.hdds.HddsUtils;
 import org.apache.hadoop.hdds.conf.ConfigurationSource;
 import org.apache.hadoop.hdds.protocol.DatanodeDetails;
-import org.apache.hadoop.hdds.protocol.proto.StorageContainerDatanodeProtocolProtos.CommandStatusReportsProto;
-import org.apache.hadoop.hdds.protocol.proto.StorageContainerDatanodeProtocolProtos.ContainerReportsProto;
-import org.apache.hadoop.hdds.protocol.proto.StorageContainerDatanodeProtocolProtos.NodeReportProto;
-import org.apache.hadoop.hdds.protocol.proto.StorageContainerDatanodeProtocolProtos.PipelineReportsProto;
-import org.apache.hadoop.hdds.security.x509.certificate.client.CertificateClient;
+import org.apache.hadoop.hdds.protocol.proto
+    .StorageContainerDatanodeProtocolProtos.CommandStatusReportsProto;
+import org.apache.hadoop.hdds.protocol.proto
+    .StorageContainerDatanodeProtocolProtos.ContainerReportsProto;
+import org.apache.hadoop.hdds.protocol.proto
+    .StorageContainerDatanodeProtocolProtos.NodeReportProto;
+import org.apache.hadoop.hdds.protocol.proto
+    .StorageContainerDatanodeProtocolProtos.PipelineReportsProto;
+import org.apache.hadoop.hdds.security.x509.certificate
+    .client.CertificateClient;
 import org.apache.hadoop.hdds.utils.LegacyHadoopConfigurationSource;
 import org.apache.hadoop.ozone.HddsDatanodeStopService;
 import org.apache.hadoop.ozone.container.common.report.ReportManager;
-import org.apache.hadoop.ozone.container.common.statemachine.commandhandler.CloseContainerCommandHandler;
-import org.apache.hadoop.ozone.container.common.statemachine.commandhandler.ClosePipelineCommandHandler;
-import org.apache.hadoop.ozone.container.common.statemachine.commandhandler.CommandDispatcher;
-import org.apache.hadoop.ozone.container.common.statemachine.commandhandler.CreatePipelineCommandHandler;
-import org.apache.hadoop.ozone.container.common.statemachine.commandhandler.DeleteBlocksCommandHandler;
-import org.apache.hadoop.ozone.container.common.statemachine.commandhandler.DeleteContainerCommandHandler;
-import org.apache.hadoop.ozone.container.common.statemachine.commandhandler.ReplicateContainerCommandHandler;
+import org.apache.hadoop.ozone.container.common.statemachine
+    .commandhandler.CloseContainerCommandHandler;
+import org.apache.hadoop.ozone.container.common.statemachine
+    .commandhandler.ClosePipelineCommandHandler;
+import org.apache.hadoop.ozone.container.common.statemachine
+    .commandhandler.CommandDispatcher;
+import org.apache.hadoop.ozone.container.common.statemachine
+    .commandhandler.CreatePipelineCommandHandler;
+import org.apache.hadoop.ozone.container.common.statemachine
+    .commandhandler.DeleteBlocksCommandHandler;
+import org.apache.hadoop.ozone.container.common.statemachine
+    .commandhandler.DeleteContainerCommandHandler;
+import org.apache.hadoop.ozone.container.common.statemachine
+    .commandhandler.TruncateBlocksCommandHandler;
+import org.apache.hadoop.ozone.container.common.statemachine
+    .commandhandler.ReplicateContainerCommandHandler;
 import org.apache.hadoop.ozone.container.keyvalue.TarContainerPacker;
 import org.apache.hadoop.ozone.container.ozoneimpl.OzoneContainer;
 import org.apache.hadoop.ozone.container.replication.ContainerReplicator;
-import org.apache.hadoop.ozone.container.replication.DownloadAndImportReplicator;
+import org.apache.hadoop.ozone.container
+    .replication.DownloadAndImportReplicator;
 import org.apache.hadoop.ozone.container.replication.ReplicationSupervisor;
-import org.apache.hadoop.ozone.container.replication.SimpleContainerDownloader;
+import org.apache.hadoop.ozone.container
+    .replication.SimpleContainerDownloader;
 import org.apache.hadoop.ozone.protocol.commands.SCMCommand;
 import org.apache.hadoop.util.JvmPauseMonitor;
 import org.apache.hadoop.util.Time;
@@ -140,6 +156,8 @@ public class DatanodeStateMachine implements Closeable {
     commandDispatcher = CommandDispatcher.newBuilder()
         .addHandler(new CloseContainerCommandHandler())
         .addHandler(new DeleteBlocksCommandHandler(container.getContainerSet(),
+            conf))
+        .addHandler(new TruncateBlocksCommandHandler(container.getContainerSet(),
             conf))
         .addHandler(new ReplicateContainerCommandHandler(conf, supervisor))
         .addHandler(new DeleteContainerCommandHandler(

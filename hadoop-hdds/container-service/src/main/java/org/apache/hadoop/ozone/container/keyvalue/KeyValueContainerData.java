@@ -80,6 +80,10 @@ public class KeyValueContainerData extends ContainerData {
 
   private long deleteTransactionId;
 
+  private final AtomicLong numPendingTruncateBlocks;
+
+  private long truncateTransactionId;
+
   private long blockCommitSequenceId;
 
   static {
@@ -94,16 +98,19 @@ public class KeyValueContainerData extends ContainerData {
 
   /**
    * Constructs KeyValueContainerData object.
-   * @param id - ContainerId
+   *
+   * @param id            - ContainerId
    * @param layOutVersion chunk layout
-   * @param size - maximum size of the container in bytes
+   * @param size          - maximum size of the container in bytes
    */
   public KeyValueContainerData(long id, ChunkLayOutVersion layOutVersion,
-      long size, String originPipelineId, String originNodeId) {
+                               long size, String originPipelineId, String originNodeId) {
     super(ContainerProtos.ContainerType.KeyValueContainer, id, layOutVersion,
         size, originPipelineId, originNodeId);
     this.numPendingDeletionBlocks = new AtomicLong(0);
+    this.numPendingTruncateBlocks = new AtomicLong(0);
     this.deleteTransactionId = 0;
+    this.truncateTransactionId = 0;
   }
 
   public KeyValueContainerData(ContainerData source) {
@@ -111,12 +118,14 @@ public class KeyValueContainerData extends ContainerData {
     Preconditions.checkArgument(source.getContainerType()
         == ContainerProtos.ContainerType.KeyValueContainer);
     this.numPendingDeletionBlocks = new AtomicLong(0);
+    this.numPendingTruncateBlocks = new AtomicLong(0);
     this.deleteTransactionId = 0;
+    this.truncateTransactionId = 0;
   }
 
   /**
    * @param version The schema version indicating the table layout of the
-   * container's database.
+   *                container's database.
    */
   public void setSchemaVersion(String version) {
     schemaVersion = version;
@@ -133,6 +142,7 @@ public class KeyValueContainerData extends ContainerData {
   /**
    * Sets Container dbFile. This should be called only during creation of
    * KeyValue container.
+   *
    * @param containerDbFile
    */
   public void setDbFile(File containerDbFile) {
@@ -141,6 +151,7 @@ public class KeyValueContainerData extends ContainerData {
 
   /**
    * Returns container DB file.
+   *
    * @return dbFile
    */
   public File getDbFile() {
@@ -149,6 +160,7 @@ public class KeyValueContainerData extends ContainerData {
 
   /**
    * Returns container metadata path.
+   *
    * @return - Physical path where container file and checksum is stored.
    */
   public String getMetadataPath() {
@@ -166,6 +178,7 @@ public class KeyValueContainerData extends ContainerData {
 
   /**
    * Returns the path to base dir of the container.
+   *
    * @return Path to base dir
    */
   public String getContainerPath() {
@@ -188,6 +201,7 @@ public class KeyValueContainerData extends ContainerData {
 
   /**
    * Returns the DBType used for the container.
+   *
    * @return containerDBType
    */
   public String getContainerDBType() {
@@ -196,6 +210,7 @@ public class KeyValueContainerData extends ContainerData {
 
   /**
    * Sets the DBType used for the container.
+   *
    * @param containerDBType
    */
   public void setContainerDBType(String containerDBType) {
@@ -244,6 +259,42 @@ public class KeyValueContainerData extends ContainerData {
   }
 
   /**
+   * Increase the count of the pending truncate blocks.
+   *
+   * @param numBlocks increment number
+   */
+  public void incrPendingTruncateBlocks(long numBlocks) {
+    this.numPendingTruncateBlocks.addAndGet(numBlocks);
+  }
+
+  /**
+   * Decrease the count of the pending truncate blocks.
+   *
+   * @param numBlocks decrement number
+   */
+  public void decrPendingTruncateBlocks(long numBlocks) {
+    this.numPendingTruncateBlocks.addAndGet(-1 * numBlocks);
+  }
+
+  public long getNumPendingTruncateBlocks() {
+    return this.numPendingTruncateBlocks.get();
+  }
+
+  /**
+   * Sets the truncateTransactionId to the latest truncate transactionId for
+   * the container.
+   *
+   * @param transactionId the latest transactionId of the container.
+   */
+  public void updateTruncateTransactionId(long transactionId) {
+    this.truncateTransactionId = transactionId;
+  }
+
+  public long getTruncateTransactionId() {
+    return this.truncateTransactionId;
+  }
+
+  /**
    * Returns a ProtoBuf Message from ContainerData.
    *
    * @return Protocol Buffer Message
@@ -265,7 +316,7 @@ public class KeyValueContainerData extends ContainerData {
       builder.setBytesUsed(this.getBytesUsed());
     }
 
-    if(this.getContainerType() != null) {
+    if (this.getContainerType() != null) {
       builder.setContainerType(ContainerProtos.ContainerType.KeyValueContainer);
     }
 
@@ -278,8 +329,9 @@ public class KeyValueContainerData extends ContainerData {
 
   /**
    * Update DB counters related to block metadata.
-   * @param db - Reference to container DB.
-   * @param batchOperation - Batch Operation to batch DB operations.
+   *
+   * @param db                - Reference to container DB.
+   * @param batchOperation    - Batch Operation to batch DB operations.
    * @param deletedBlockCount - Number of blocks deleted.
    * @throws IOException
    */
@@ -290,11 +342,11 @@ public class KeyValueContainerData extends ContainerData {
 
     // Set Bytes used and block count key.
     metadataTable.putWithBatch(batchOperation, CONTAINER_BYTES_USED,
-            getBytesUsed());
+        getBytesUsed());
     metadataTable.putWithBatch(batchOperation, BLOCK_COUNT,
-            getKeyCount() - deletedBlockCount);
+        getKeyCount() - deletedBlockCount);
     metadataTable.putWithBatch(batchOperation, PENDING_DELETE_BLOCK_COUNT,
-            (long)(getNumPendingDeletionBlocks() - deletedBlockCount));
+        (long) (getNumPendingDeletionBlocks() - deletedBlockCount));
 
     db.getStore().getBatchHandler().commitBatchOperation(batchOperation);
   }

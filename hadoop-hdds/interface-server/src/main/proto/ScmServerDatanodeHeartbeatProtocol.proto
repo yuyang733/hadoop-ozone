@@ -223,6 +223,7 @@ message CommandStatus {
   required SCMCommandProto.Type type = 3;
   optional string msg = 4;
   optional ContainerBlocksDeletionACKProto blockDeletionAck = 5;
+  optional ContainerBlocksTruncateACKProto blockTruncateAck = 6;
 }
 
 message ContainerActionsProto {
@@ -293,6 +294,7 @@ message SCMCommandProto {
     replicateContainerCommand = 5;
     createPipelineCommand = 6;
     closePipelineCommand = 7;
+    truncateBlocksCommand = 8;
   }
   // TODO: once we start using protoc 3.x, refactor this message using "oneof"
   required Type commandType = 1;
@@ -303,6 +305,7 @@ message SCMCommandProto {
   optional ReplicateContainerCommandProto replicateContainerCommandProto = 6;
   optional CreatePipelineCommandProto createPipelineCommandProto = 7;
   optional ClosePipelineCommandProto closePipelineCommandProto = 8;
+  optional TruncateBlocksCommandProto truncateBlocksCommandProto=9;
 }
 
 /**
@@ -339,6 +342,33 @@ message ContainerBlocksDeletionACKProto {
   }
   repeated DeleteBlockTransactionResult results = 1;
   required string dnId = 2;
+}
+
+// HeartBeat response from SCM, contains a list of block truncate transactions.
+message TruncateBlocksCommandProto {
+  repeated TruncatedBlocksTransaction truncatedBlocksTransactions = 1;
+  required int64 cmdId = 2;
+}
+
+// ACK message datanode sent to SCM, contains the result of
+// block truncate transactions.
+message ContainerBlocksTruncateACKProto {
+  message TruncateBlockTransactionResult {
+    required int64 txID = 1;
+    required int64 containerID = 2;
+    required bool success = 3;
+  }
+  repeated TruncateBlockTransactionResult results = 1;
+  required string dnId = 2;
+}
+
+// The truncated blocks which are stored in truncatedBlock.db of scm.
+message TruncatedBlocksTransaction {
+  required int64 txID = 1;
+  required int64 containerID = 2;
+  repeated PartialTruncateBlock blocks = 3;
+  // the retry time of sending truncating command to datanode.
+  required int32 count = 4;
 }
 
 /**

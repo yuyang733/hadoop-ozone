@@ -15,7 +15,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.hadoop.ozone.container.common.states.endpoint;
 
 import com.google.common.base.Preconditions;
@@ -49,6 +48,7 @@ import org.apache.hadoop.ozone.protocol.commands.CloseContainerCommand;
 import org.apache.hadoop.ozone.protocol.commands.ClosePipelineCommand;
 import org.apache.hadoop.ozone.protocol.commands.CreatePipelineCommand;
 import org.apache.hadoop.ozone.protocol.commands.DeleteBlocksCommand;
+import org.apache.hadoop.ozone.protocol.commands.TruncateBlocksCommand;
 import org.apache.hadoop.ozone.protocol.commands.DeleteContainerCommand;
 import org.apache.hadoop.ozone.protocol.commands.ReplicateContainerCommand;
 
@@ -280,6 +280,15 @@ public class HeartbeatEndpointTask
           }
           this.context.addCommand(db);
         }
+        break;
+      case truncateBlocksCommand:
+        TruncateBlocksCommand truncateBlocksCommand =
+            TruncateBlocksCommand.getFromProtobuf(
+                commandResponseProto.getTruncateBlocksCommandProto());
+        if (!truncateBlocksCommand.blocksToBeTruncate().isEmpty()) {
+          // debug info summary
+        }
+        this.context.addCommand(truncateBlocksCommand);
         break;
       case closeContainerCommand:
         CloseContainerCommand closeContainer =

@@ -68,6 +68,15 @@ public class DatanodeSchemaOneDBDefinition
             ChunkInfoList.class,
             new SchemaOneChunkInfoListCodec());
 
+  public static final DBColumnFamilyDefinition<String, ChunkInfoList>
+      TRUNCATED_BLOCKS =
+      new DBColumnFamilyDefinition<>(
+          StringUtils.bytes2String(RocksDB.DEFAULT_COLUMN_FAMILY),
+          String.class,
+          new SchemaOneKeyCodec(),
+          ChunkInfoList.class,
+          new SchemaOneChunkInfoListCodec());
+
   protected DatanodeSchemaOneDBDefinition(String dbPath) {
     super(dbPath);
   }
@@ -87,5 +96,11 @@ public class DatanodeSchemaOneDBDefinition
   public DBColumnFamilyDefinition<String, ChunkInfoList>
       getDeletedBlocksColumnFamily() {
     return DELETED_BLOCKS;
+  }
+
+  @Override
+  public DBColumnFamilyDefinition<String, ChunkInfoList>
+      getTruncatedBlocksColumnFamily() {
+    return TRUNCATED_BLOCKS;
   }
 }

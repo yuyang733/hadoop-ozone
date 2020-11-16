@@ -276,3 +276,18 @@ message BlockID {
     required ContainerBlockID containerBlockID = 1;
     optional uint64 blockCommitSequenceId = 2 [default = 0];
 }
+
+/**
+ * A truncated key and its blocks needed to be deleted and the  block needed to be partially truncated.
+ */
+message TruncateKey {
+    required string key = 1;
+    repeated BlockID deleteBlocks = 2;
+    repeated PartialTruncateBlock partialTruncateBlocks = 3;
+}
+
+// A partially truncated block, including the newLength
+message PartialTruncateBlock {
+    required BlockID truncateBlock = 1;
+    required uint64 newLength = 2;
+}

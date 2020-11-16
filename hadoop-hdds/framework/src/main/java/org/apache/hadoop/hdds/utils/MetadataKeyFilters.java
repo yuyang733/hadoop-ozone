@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.hdds.StringUtils;
+import org.apache.hadoop.hdds.utils.MetadataKeyFilters.KeyPrefixFilter;
 import org.apache.hadoop.ozone.OzoneConsts;
 
 import com.google.common.base.Preconditions;
@@ -35,6 +36,11 @@ public final class MetadataKeyFilters {
   public static KeyPrefixFilter getDeletingKeyFilter() {
     return new MetadataKeyFilters.KeyPrefixFilter()
             .addFilter(OzoneConsts.DELETING_KEY_PREFIX);
+  }
+
+  public static KeyPrefixFilter getTruncatingKeyFilter() {
+    return new MetadataKeyFilters.KeyPrefixFilter()
+        .addFilter(OzoneConsts.TRUNCATE_TRANSACTION_KEY);
   }
 
   /**
